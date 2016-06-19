@@ -5,13 +5,10 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-
-import javax.swing.*;
 
 public class Main extends Application{
 
@@ -57,15 +54,23 @@ public class Main extends Application{
         primaryStage.show();
     }
     Utils utils = new Utils();
-    private void encryptButtonClicked() throws Exception {
+    private void encryptButtonClicked() {
         char[] input = passwordField.getText().toCharArray();
         String message = messageField.getText();
         passwordField.setText("");
-        utils.encrypt(message,input);
+        try {
+            utils.encrypt(message,input);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
-    private void decryptButtonClicked() throws Exception {
+    private void decryptButtonClicked() {
         char[] input = passwordField.getText().toCharArray();
         passwordField.setText("");
-        messageField.setText(utils.decrypt(input));
+        try {
+            messageField.setText(utils.decrypt(input));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

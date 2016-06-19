@@ -1,90 +1,108 @@
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.security.SecureRandom;
-import java.security.spec.KeySpec;
-import java.util.Base64;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
- * Created by Wouter on 19-6-2016.
+ * Created by wouter on 19-6-2016.
  */
 public class Utils {
     SecureRandom sr = new SecureRandom();
 
-    public void encrypt(String message, char[] password) throws Exception {
-        byte[] salt = new byte[32];
+
+    public void encrypt(String message, char[] password) throws Exception{
+        PBEKeySpec pbeKeySpec;
+        PBEParameterSpec pbeParamSpec;
+        SecretKeyFactory keyFac;
+
+        // Salt
+        byte[] salt = new byte[8];
         sr.nextBytes(salt);
 
-        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-//        KeySpec spec = new PBEKeySpec(password, salt, 65536, 256);
-        KeySpec spec = new PBEKeySpec(password, salt, 65536, 128);
-        SecretKey tmp = factory.generateSecret(spec);
-        SecretKey secret = new SecretKeySpec(tmp.getEncoded(), "AES");
+        // Iteration count
+        int count = 20;
 
-        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-        cipher.init(Cipher.ENCRYPT_MODE, secret);
-        System.out.println(secret.getEncoded().toString());
+        // Create PBE parameter set
+        pbeParamSpec = new PBEParameterSpec(salt, count);
 
-        byte[] ciphertext = cipher.doFinal(message.getBytes("UTF-8"));
+        // Prompt user for encryption password.
+        // Collect user password as char array (using the
+        // "readPassword" method from above), and convert
+        // it into a SecretKey object, using a PBE key
+        // factory.
 
+        pbeKeySpec = new PBEKeySpec(password);
+        keyFac = SecretKeyFactory.getInstance("PBEWithMD5AndDES");
+        SecretKey pbeKey = keyFac.generateSecret(pbeKeySpec);
 
+        // Create PBE Cipher
+        Cipher pbeCipher = Cipher.getInstance("PBEWithMD5AndDES");
+
+        // Initialize PBE Cipher with key and parameters
+        pbeCipher.init(Cipher.ENCRYPT_MODE, pbeKey, pbeParamSpec);
+
+        // Our cleartext
+//        byte[] cleartext = "This is another example".getBytes();
+
+        // Encrypt the cleartext
+        byte[] ciphertext = pbeCipher.doFinal(message.getBytes());
+//        return ciphertext;
         FileOutputStream fos = new FileOutputStream("AAA");
         ObjectOutputStream oos = new ObjectOutputStream(fos);
-        oos.write(salt);
-        oos.write(ciphertext);
+        oos.writeObject(salt);
+        oos.writeObject(ciphertext);
         oos.close();
         fos.close();
     }
+    public String decrypt(char[] password) throws Exception{
 
-    public String decrypt(char[] password) throws Exception {
+        PBEKeySpec pbeKeySpec;
+        PBEParameterSpec pbeParamSpec;
+        SecretKeyFactory keyFac;
+
         FileInputStream fis = new FileInputStream("AAA");
         ObjectInputStream ois = new ObjectInputStream(fis) {
         };
 
-        byte[] salt = new byte[32];
-        ois.read(salt);
-        byte[] message = test(ois);
+
+        byte[] salt = (byte[]) ois.readObject();
+        byte[] message = (byte[]) ois.readObject();
         ois.close();
         fis.close();
+        // Iteration count
+        int count = 20;
 
+        // Create PBE parameter set
+        pbeParamSpec = new PBEParameterSpec(salt, count);
 
-        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-        KeySpec spec = new PBEKeySpec(password, salt, 65536, 128);
-        SecretKey tmp = factory.generateSecret(spec);
-        SecretKey secret = new SecretKeySpec(tmp.getEncoded(), "AES");
-        System.out.println(secret.getEncoded().toString());
+        // Prompt user for encryption password.
+        // Collect user password as char array (using the
+        // "readPassword" method from above), and convert
+        // it into a SecretKey object, using a PBE key
+        // factory.
 
-        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-        byte[] iv = cipher.getParameters().getParameterSpec(IvParameterSpec.class).getIV();
+        pbeKeySpec = new PBEKeySpec(password);
+        keyFac = SecretKeyFactory.getInstance("PBEWithMD5AndDES");
+        SecretKey pbeKey = keyFac.generateSecret(pbeKeySpec);
 
-        cipher.init(Cipher.DECRYPT_MODE, secret, new IvParameterSpec(iv));
-        byte[] ciphertext = cipher.doFinal(message);
-        System.out.println(cipher.toString());
+        // Create PBE Cipher
+        Cipher pbeCipher = Cipher.getInstance("PBEWithMD5AndDES");
 
-        return ciphertext.toString();
+        // Initialize PBE Cipher with key and parameters
+        pbeCipher.init(Cipher.DECRYPT_MODE, pbeKey, pbeParamSpec);
 
-    }
-    public byte[] test (InputStream is ) throws Exception{
+        // Our cleartext
+//        byte[] cleartext = "This is another example".getBytes();
 
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-
-        int nRead;
-        byte[] data = new byte[16384];
-
-        while ((nRead = is.read(data, 0, data.length)) != -1) {
-            buffer.write(data, 0, nRead);
-        }
-
-        buffer.flush();
-
-        return buffer.toByteArray();
+        // Encrypt the cleartext
+        byte[] ciphertext = pbeCipher.doFinal(message);
+        return new String(ciphertext);
 
     }
 }
