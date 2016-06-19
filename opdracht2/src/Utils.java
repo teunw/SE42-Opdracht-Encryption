@@ -3,10 +3,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.security.SecureRandom;
 
 /**
@@ -16,7 +13,7 @@ public class Utils {
     SecureRandom sr = new SecureRandom();
 
 
-    public void encrypt(String message, char[] password) throws Exception{
+    public void encrypt(File file, String message, char[] password) throws Exception{
         PBEKeySpec pbeKeySpec;
         PBEParameterSpec pbeParamSpec;
         SecretKeyFactory keyFac;
@@ -53,20 +50,20 @@ public class Utils {
         // Encrypt the cleartext
         byte[] ciphertext = pbeCipher.doFinal(message.getBytes());
 //        return ciphertext;
-        FileOutputStream fos = new FileOutputStream("AAA");
+        FileOutputStream fos = new FileOutputStream(file.toString());
         ObjectOutputStream oos = new ObjectOutputStream(fos);
         oos.writeObject(salt);
         oos.writeObject(ciphertext);
         oos.close();
         fos.close();
     }
-    public String decrypt(char[] password) throws Exception{
+    public String decrypt(File file, char[] password) throws Exception{
 
         PBEKeySpec pbeKeySpec;
         PBEParameterSpec pbeParamSpec;
         SecretKeyFactory keyFac;
 
-        FileInputStream fis = new FileInputStream("AAA");
+        FileInputStream fis = new FileInputStream(file.toString());
         ObjectInputStream ois = new ObjectInputStream(fis) {
         };
 

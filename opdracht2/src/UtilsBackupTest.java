@@ -21,13 +21,13 @@ public class UtilsBackupTest extends UtilsBackup {
         System.out.println(a);
         Assert.assertEquals(a.toString(),message);
     }
-    @org.junit.Test
-    public void testEncrypt2() throws Exception {
-        Utils u2 = new Utils();
-        u2.encrypt(message,password.toCharArray());
-        String b = u2.decrypt(password.toCharArray());
-
-        Assert.assertEquals(b,message);
-    }
+//    @org.junit.Test
+//    public void testEncrypt2() throws Exception {
+//        Utils u2 = new Utils();
+//        u2.encrypt(message,password.toCharArray());
+//        String b = u2.decrypt(password.toCharArray());
+//
+//        Assert.assertEquals(b,message);
+//    }
 
 }
