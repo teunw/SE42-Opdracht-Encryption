@@ -1,5 +1,8 @@
 package nl.teunwillems.applications;
 
+import nl.teunwillems.ApplicationPortal;
+import nl.teunwillems.applications.utils.EncryptionUtil;
+
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 
@@ -9,18 +12,9 @@ import java.security.NoSuchAlgorithmException;
 public class PublicPrivateKeyApp implements Runnable {
 
     public void run() {
-        KeyPairGenerator keyGen = null;
-        try {
-            keyGen = KeyPairGenerator.getInstance("RSA");
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        keyGen.initialize(512);
-        byte[] publicKey = keyGen.genKeyPair().getPublic().getEncoded();
-        StringBuffer retString = new StringBuffer();
-        for (int i = 0; i < publicKey.length; ++i) {
-            retString.append(Integer.toHexString(0x0100 + (publicKey[i] & 0x00FF)).substring(1));
-        }
-        System.out.println(retString);
+        EncryptionUtil.generateKey();
+        System.out.println("Done");
+        ApplicationPortal.main(new String[] {});
+
     }
 }

@@ -25,8 +25,8 @@ public class ApplicationPortal {
 
         System.out.println("Select an application (1,2 or 3)");
         System.out.println("Application 0: Public/Private key generator");
-        System.out.println("Application 1: Private key reader");
-        System.out.println("Application 2: File reader");
+        System.out.println("Application 1: Decryption");
+        System.out.println("Application 2: Encryption");
 
         String inputString = new Scanner(System.in).nextLine();
         try {
